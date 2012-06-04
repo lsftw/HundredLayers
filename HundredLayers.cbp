@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="HundredLayers" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Release">
+				<Option output="bin\Release\HundredLayers" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin\Release" />
+				<Option object_output="obj\Release\" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-Wall" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add directory="C:\SFML-2.0-selfcompiled\include" />
+		</Compiler>
+		<Linker>
+			<Add option="-lopengl32" />
+			<Add option="-lglu32" />
+			<Add option="-lsfml-graphics" />
+			<Add option="-lsfml-window" />
+			<Add option="-lsfml-system" />
+			<Add directory="C:\SFML-2.0-selfcompiled\lib" />
+		</Linker>
+		<Unit filename="Base.h" />
+		<Unit filename="DisplayElement.cpp" />
+		<Unit filename="DisplayElement.hpp" />
+		<Unit filename="Game.cpp" />
+		<Unit filename="Hud.cpp" />
+		<Unit filename="Hud.hpp" />
+		<Unit filename="Items.cpp" />
+		<Unit filename="Items.hpp" />
+		<Unit filename="PlayerSession.hpp" />
+		<Unit filename="Utility.cpp" />
+		<Unit filename="Utility.hpp" />
+		<Unit filename="bin\Release\data\items.txt" />
+		<Unit filename="designdoc.txt" />
+		<Unit filename="devnote.txt" />
+		<Unit filename="stasis.txt" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

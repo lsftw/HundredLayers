@@ -1,0 +1,425 @@
+// Copied w/ minor formatting change from the Google Doc, some info [esp. items/enemies] may be outdated
+
+-----------------------------------------------------------------------------------------------------------------------
+Basic Concepts
+-----------------------------------------------------------------------------------------------------------------------
+
+Level 1
+XP 0/2
+H 10/10
+A 1
+D 0
+S 3
+
+Exploration
+fight
+descend
+activate
+invoke (active item)
+
+Combat
+attack [image of an explosion]
+defend [image of a brick wall]
+wait [image of a tree]
+
+Effects
+on-atk = attacks enemy for damage
+on-def = damage taken halved
+on-wait = does nothing
+
+-----------------------------------------------------------------------------------------------------------------------
+Rules
+-----------------------------------------------------------------------------------------------------------------------
+
+Mechanics
+- Always round down [truncate since no negative values] decimals unless stated otherwise
+- Modifications to Atk/Def/Spd in combat are reverted out of combat
+How to Play
+- Start on floor 1
+- Try to beat floor 100
+- Special floors 10, 20, 30, 40, 50, 60, 70, 80, 90, 100
+- Don't lose all your Hp!
+- Going down a floor restores 50% max hp
+Each floor has
+- 1 exit downwards to the next floor
+- 1 feature, that can be activated
+- 1 monster, that blocks the exit/feature/both, can be fought to gain XP
+In Combat
+- You can atk / def / wait
+- Items modify the results
+- Wait normally useless, but most magic items trigger on-wait
+- Enemies have some reactionary AI
+On level up
+- You gain hp (grows fastest of all stats), and heal that amount of hp
+- You gain atk
+- You gain def (grows slower than atk)
+- You gain spd (grows slower than def)
+Scaling
+- Spd > Def > Atk > Hp in quantity
+- Spd gets less valuable as you get more due to how it functions
+- Expected level at floor 100: 13/14 (underleveled), 15 (normal), 16/17 (powergame/luck)
+- Absolute max level: 18 (extremely unlikely to ever reach)
+- Expect to level up to: 2 by floor 2, 3 by floor 4, 4 by floor 7, etc
+- 1-1, 2-2, 3-4, 4-7, 5-11, 6-17, 7-23, 8-30, 9-38, 10-47, 11-57, 12-68, 13-80, 14-93, 15-107
+-- as in, it takes <x> floors to level up when at level <x>
+-- assuming you only gain XP from monsters and you always fight monsters
+
+-----------------------------------------------------------------------------------------------------------------------
+Items
+-----------------------------------------------------------------------------------------------------------------------
+
+Olive Branch: pacifies enemy but gain no xp [they leave, no XP gained]
+Bag of Gold [1]: bribes enemy but still gain xp [they leave, you still gain XP]
+
+Chain Gloves: +1 def, -1 spd
+
+Jousting Lance: on-atk +20% dmg dealt
+Mad Mask: on-atk heal 50% of dmg dealt, on-def waits instead
+Blaze Blade: on-atk deals (atk/3 rup) bonus dmg
+
+Glimmering Targe: on-def enemy acts erratically
+Tower Shield: on-def damage taken reduced to 1/4, on-wait gains defend effect
+Spiked Buckler: on-def damages attacking enemy for $def
+
+Laurel of Peace: [3/combat] on-wait enemy waits
+Glacier Gloves: [1/combat] on-wait deals 20% dmg, stuns
+Focus Talisman: on-wait increases atk, def, spd by 1
+Staff of Lightning: on-wait deals 3 + 10% dmg ignoring def
+
+Savior Sash [1]: turns a fatal blow into near-fatal
+
+Combat Item Slots (3):
+PRIMARY
+SECONDARY
+TERTIARY
+effects are layered: process teriary then secondary then primary (end expected result is that higher priority overrides if necessary)
+
+Exploration Item Slots (3):
+Ordering doesn't matter
+
+-----------------------------------------------------------------------------------------------------------------------
+Item Scripting
+-----------------------------------------------------------------------------------------------------------------------
+
+items.txt
+// Text after // on each line is ignored
+
+//
+// Invokables / Exploration Items
+//
+Olive Branch
+invokable
+"pacifies enemy but gain no xp"
+remove-enemy
+
+Bag of Gold
+invokable 1
+"bribes enemy but still gain xp"
+gain-xp enemy.xp
+remove-enemy
+
+//
+// Passive Items
+//
+Boots of Speed
+passive
++2 spd per lvl
+
+Chain Gloves
+passive
++2 def per lvl
+-2 spd per lvl
+
+Philosopher Edict
+passive
+-5 hp per lvl
++10% hp per lvl
+
+Relic
+passive
++3 hp per lvl
+
+Halcyon Plumage
+passive
+-50% atk
++100% spd
+
+//
+// Active Items
+//
+Jousting Lance
+active
+on-atk "+20% dmg dealt"
+enemy.hurt 20% of dmg dealt
+
+Mad Mask
+active
+on-atk "heal 50% of dmg dealt"
+heal 50% of dmg dealt
+on-def "waits instead"
+force-act wait
+
+Blaze Blade
+active
+on-atk "deals (atk/3 rup) bonus dmg"
+enemy.hurt atk /+ 3
+
+Glimmering Targe
+active
+on-def "enemy acts erratically"
+enemy.force-act random
+
+Tower Shield
+active
+on-def "damage taken reduced to 1/4"
+dmg-reduce 25%
+on-wait "gains defend effect"
+dmg-reduce 50%
+
+Spiked Buckler
+active
+on-def "damages attacking enemy for $def"
+add-trigger enemy-atk
+ enemy.hurt def
+
+Laurel of Peace
+active 3/combat
+on-wait "enemy waits"
+enemy.force-act wait
+
+Glacier Gloves
+active 1/combat
+on-wait "deals 20% dmg, stuns"
+enemy.hurt 20% of enemy.hp
+enemy.force-act wait
+
+Focus Talisman
+active
+on-wait "increases atk, def, spd by 1"
+set-atk atk + 1
+set-def def + 1
+set-spd spd + 1
+
+Staff of Lightning
+active
+on-wait "deals 3 + 10% dmg ignoring def"
+enemy.hurt 3 + 10% of enemy.hp
+
+Savior Sash
+active 1
+"turns a fatal blow into near-fatal"
+on-changed-hp
+if hp <= 0
+ set-hp 1
+else
+ unused
+fi
+-----------------------------------------------------------------------------------------------------------------------
+
+String Replacements
+$<stat> [turns into literal value for stat]
+rup [turns into up arrow]
+
+Exploration Scriptings
+remove-enemy
+gain-xp <value>
+
+Combat Scriptings
+enemy.<script>
+add-trigger (enemy-atk / enemy-def / enemy-wait) { code } [lasts one turn]
+heal <value>
+hurt <value>
+force-act (atk / def / wait / random) [for enemy, their next action is forced to be this]
+set-<stat> <value> [ex: set-atk atk + 3, note: temporary only for in-combat]
+swap <stat> and <stat> [note: temporary only for in-combat]
+dmg-reduce <value OR percentage> [percentages stack additively, lasts one turn]
+if <conditional> then <code> else <code> fi
+unused [charges not lowered]
+
+Values
+<any numeric literal>
+(<value>)
+x% of <value>
+<value> + <value>
+<value> - <value>
+<value> * <value>
+<value> / <value> [note: truncates to integer]
+<value> /+ <value> [note: division, rounded up to integer]
+<value> per level [same as <value> * user level]
+user level
+dmg dealt [applies only for on-atk, basic damage dealt after mitigations]
+<stat>
+enemy.<stat>
+
+Stats
+xp [for you it is total xp, for enemy it is xp gained on victory]
+hp
+hp-max
+mp
+mp-max
+atk
+atk-normal
+def
+def-normal
+spd
+spd-normal
+
+-----------------------------------------------------------------------------------------------------------------------
+Base Scripting
+-----------------------------------------------------------------------------------------------------------------------
+
+action-trigger
+* triggers on-action effects, note that force-act will cause code afterwards to be ignored if different action
+
+Usable Actions
+
+atk “Attack”
+set-dmg-dealt atk - enemy.def
+action-trigger
+enemy.hurt dmg dealt
+
+def “Defend”
+action-trigger
+dmg-reduce 50%
+
+wait “Wait”
+action-trigger
+
+Other Actions
+
+enemy.<action>
+// same as <action> but triggers for enemy
+
+changed-<stat>
+// ...code where the stat will change
+action-trigger
+
+-----------------------------------------------------------------------------------------------------------------------
+Enemies
+-----------------------------------------------------------------------------------------------------------------------
+
+XP needed to Level Up (xp resets after levelling up): [rough guidelines]
+2
+5
+10
+25
+55
+100
+
+Slime
+h 3
+a 1
+s 2
+xp 2
+slime slide (2, offensive): atks for 2x dmg, own def -1
+
+Infected Bat
+h 3
+a 1
+s 7
+xp 4
+infection= deals 1 bonus dmg ignoring def on atk
+flight= -20% dmg taken from normal atks if faster than enemy
+
+Bandit
+h 8
+a 3
+s 5
+xp 10
+cripple (once, initiator): enemy spd -2
+
+Renegade
+h 10
+a 3
+d 1
+s 5
+xp 15
+knockout (3, finisher/desperation): atks for 2x dmg, waits next turn
+
+Shade
+h 5
+a 3
+s 7
+xp 15
+ethereal= normal atk dmg taken capped at 1
+malice (once, finisher): deals 3 dmg ignoring def, hp -3
+
+Restless Archer
+h 10
+a 5
+d 1
+s 5
+xp 18
+restless duty (5, initiator): hp -3, spd +5
+take aim (3, offensive): charges 1 turn then atks for 2x dmg ignoring def
+
+Restless Gladiator
+h 13
+a 5
+d 1
+s 5
+xp 22
+restless fury= whenever enemy waits, spd +1
+sweeping slash (2, offensive): atks, enemy def -1, def -1
+lunge (3, finisher): atks, deals double dmg if enemy has 0 def, waits next turn
+
+Floor 10 boss
+Rotting Bandit
+h 15
+a 5
+s 5
+xp 30
+rotten touch= enemy def -1, spd -1 on atk
+decay (3, offensive): deals 5 dmg ignoring def, hp -3 spd -1
+
+Warpwind Mage
+h 10
+a 6
+d 4
+s 9
+xp 28
+warpwind= enemy on-atk / on-def effects swapped
+gale (3, initiator/defensive): spd +2 if enemy is faster, spd +1 otherwise
+backlash (5, defensive): if enemy attacks afterwards, atks for 3x dmg, otherwise atks self
+
+Restless Spirit
+h 10
+a 6
+s 12
+xp 15
+ethereal= normal atk dmg taken capped at 1
+
+Floor 20 boss
+Warpwind Exile
+h 20
+a 8
+d 4
+s 11
+xp 55
+warpwind= enemy on-atk / on-def effects swapped
+riposte (5, defensive): if enemy attacks afterwards, atks for 3x dmg, otherwise waits 1 turn
+ghastly form (5, defensive): gain ethereal ability while this ability is on cooldown
+night gale (3, initator/offensive): spd +1, spd +1 while this ability is on cooldown
+ethereal blast (3, offensive): deals 8 damage ignoring def, bonus 4 damage ignoring def if ghastly form on cooldown, enemy spd-2 if night gale on cooldown
+
+Twisted Guardian
+h 16
+a 8
+d 8
+s 8
+xp 49
+guardian= atk & def stats rise/lower together
+stand strong (3, defensive)= spd -1, def +5 spd -5 while ability on cooldown
+mighty strike (4, initiator/finisher)= atks for 2x dmg, def -2
+
+Deceiver
+h 12
+a 4
+d 5
+s 5
+xp 53
+deception (once, initiator): if all stats lower than enemy stats, hp +2 atk +3 def +4 spd +5
+hide (2, defensive): atk -2 def +3
+trickery (1, offensive): atks with the greater of atk and (atk+enemy atk)/2, atk +1 def -1
+
+

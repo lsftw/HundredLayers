@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Release" />
+	<File name="Base.h" open="0" top="0" tabpos="3">
+		<Cursor position="227" topLine="0" />
+	</File>
+	<File name="DisplayElement.cpp" open="0" top="0" tabpos="2">
+		<Cursor position="731" topLine="0" />
+	</File>
+	<File name="DisplayElement.hpp" open="0" top="0" tabpos="3">
+		<Cursor position="339" topLine="9" />
+	</File>
+	<File name="Game.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="2592" topLine="63" />
+	</File>
+	<File name="Hud.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="720" topLine="19" />
+	</File>
+	<File name="Hud.hpp" open="0" top="0" tabpos="0">
+		<Cursor position="48" topLine="0" />
+	</File>
+	<File name="Items.cpp" open="0" top="0" tabpos="6">
+		<Cursor position="1812" topLine="60" />
+	</File>
+	<File name="Items.hpp" open="0" top="0" tabpos="5">
+		<Cursor position="1989" topLine="33" />
+	</File>
+	<File name="PlayerSession.hpp" open="0" top="0" tabpos="7">
+		<Cursor position="182" topLine="0" />
+	</File>
+	<File name="Utility.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="664" topLine="6" />
+	</File>
+	<File name="Utility.hpp" open="0" top="0" tabpos="6">
+		<Cursor position="0" topLine="0" />
+	</File>
+	<File name="bin\Release\data\items.txt" open="0" top="0" tabpos="0">
+		<Cursor position="1358" topLine="77" />
+	</File>
+	<File name="designdoc.txt" open="0" top="0" tabpos="0">
+		<Cursor position="7631" topLine="0" />
+	</File>
+	<File name="devnote.txt" open="0" top="0" tabpos="0">
+		<Cursor position="560" topLine="0" />
+	</File>
+</CodeBlocks_layout_file>

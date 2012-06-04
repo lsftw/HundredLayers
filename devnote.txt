@@ -1,0 +1,21 @@
+
+crash - weird - mouseover exit 0
+* mousing over the top left corner of the gui causes the game to crash
+* but it returns with status 0 and no message..?
+** cause found
+** main game loop in sfml.cpp
+** "event.key.code == sf::Keyboard::Escape" triggers
+|
+part of bigger issue
+mousing over the top parts of the GUI seem to trigger pressing the F## keys
+
+
+
+Items
+* currently finished loading, still need to generate description for scripting portions
+
+Gui
+* Make it display based on player session
+** might need to implement fonts for this
+
+

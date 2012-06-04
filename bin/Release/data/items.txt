@@ -1,0 +1,112 @@
+// Text after // on each line is ignored
+
+//
+// Invokables / Exploration Items
+//
+Olive Branch
+invokable
+"pacifies enemy but gain no xp"
+remove-enemy
+
+Bag of Gold
+invokable 1
+"bribes enemy but still gain xp"
+gain-xp enemy.xp
+remove-enemy
+
+//
+// Passive Items
+//
+Boots of Speed
+passive
++2 spd per lvl
+
+Chain Gloves
+passive
++2 def per lvl
+-2 spd per lvl
+
+Philosopher Edict
+passive
+-5 hp per lvl
++10% hp per lvl
+
+Relic
+passive
++3 hp per lvl
+
+Halcyon Plumage
+passive
+-50% atk
++100% spd
+
+//
+// Active Items
+//
+Jousting Lance
+active
+on-atk "+20% dmg dealt"
+enemy.hurt 20% of dmg dealt
+
+Mad Mask
+active
+on-atk "heal 50% of dmg dealt"
+heal 50% of dmg dealt
+on-def "waits instead"
+force-act wait
+
+Blaze Blade
+active
+on-atk "deals (atk/3 rup) bonus dmg"
+enemy.hurt atk /+ 3
+
+Glimmering Targe
+active
+on-def "enemy acts erratically"
+enemy.force-act random
+
+Tower Shield
+active
+on-def "damage taken reduced to 1/4"
+dmg-reduce 25%
+on-wait "gains defend effect"
+dmg-reduce 50%
+
+Spiked Buckler
+active
+on-def "damages attacking enemy for $def"
+add-trigger enemy-atk
+ enemy.hurt def
+
+Laurel of Peace
+active 3/combat
+on-wait "enemy waits"
+enemy.force-act wait
+
+Glacier Gloves
+active 1/combat
+on-wait "deals 20% dmg, stuns"
+enemy.hurt 20% of enemy.hp
+enemy.force-act wait
+
+Focus Talisman
+active
+on-wait "increases atk, def, spd by 1"
+set-atk atk + 1
+set-def def + 1
+set-spd spd + 1
+
+Staff of Lightning
+active
+on-wait "deals 3 + 10% dmg ignoring def"
+enemy.hurt 3 + 10% of enemy.hp
+
+Savior Sash
+active 1
+"turns a fatal blow into near-fatal"
+on-changed-hp
+if hp <= 0
+ set-hp 1
+else
+ unused
+fi

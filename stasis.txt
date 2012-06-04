@@ -1,0 +1,176 @@
+/// Items.hpp
+
+#ifndef ITEMS_H_INCLUDED
+#define ITEMS_H_INCLUDED
+
+// Stores all the information about items, retrieve the information with an ItemId
+typedef unsigned int ItemId;
+
+enum ItemType {PASSIVE, ACTIVE, HYBRID, INVOKABLE};
+
+/// TODO where should item scripting go?
+
+/// TODO keep list of all items, add in the no items for 0 & warn for bad queries
+
+/// TODO some itemid representing hybrid item?
+
+// built-in limitation of 10,000 different items, though it should work fine if you increase/decrease
+// ^- but save/load compatibility probably would break between files w/ different max number of items
+// Hybrid Item Id-ing: digit combination, fill gap between 1st & 2nd item w/ zeroes
+// Item # 85 + Item # 10000 = 8510000
+// Item # 597 + Item # 4 = 59700004
+// hybridid = item1id * pow(10, digits(ID_MAX)) + item2id
+// item1id = hybridid / pow(10, digits(ID_MAX))
+// item2id = hybridid % pow(10, digits(ID_MAX))
+
+const char* ITEM_SCHEMA_FILE = "data/items.txt";
+const char* IMAGE_EXTENSION = ".png";
+
+class Item
+{
+    private:
+    ItemId id; // unique identifier of items
+    std::string name;
+    std::string imageName;
+    ItemType type;
+    bool limitedUse;
+    unsigned int charges; // only matters if invokable / limited use per combat
+    std::vector<std::string> scripting; // after loading, this shouldn't be modified
+    //
+    static std::vector<Item> itemsById;
+    // static std::map<std::string, Item> itemsByName;
+
+    public:
+    static const ItemId ID_NOITEM = 0; // represents an empty item slot, recommended to be lowest value
+    static const ItemId ID_MAX = 10000; // affects hybrid item id calculation
+
+    /*Item()
+    {
+        limitedUse = false;
+        charges = 1;
+    }*/
+
+    // V- make this into a constant expression when that C++ update comes out
+    static unsigned int digitOffsetCoefficient()
+    {
+        // get # digits in ID_MAX, yes this doesn't work for edge case ID_MAX = 0, doesn't matter
+        unsigned int cur = ID_MAX;
+        unsigned int digits = 0;
+        while (cur > 0)
+        {
+            cur %= 10;
+            ++digits;
+        }
+        // calculate coefficient, 10^(digits)
+        unsigned int coefficient = 1;
+        while (digits--)
+        {
+            coefficient *= 10;
+        }
+        return coefficient;
+    }
+    // Hybrid Item ID Calculation Methods
+    static ItemId calcHybridId(ItemId item1, ItemId item2)
+    {
+        return item1 * digitOffsetCoefficient() + item2;
+    }
+    static ItemId extractId1(ItemId hybrid)
+    {
+        return hybrid / digitOffsetCoefficient();
+    }
+    static ItemId extractId2(ItemId hybrid)
+    {
+        return hybrid % digitOffsetCoefficient();
+    }
+
+    // Generates image name by lowercasing and replacing spaces with underscores
+    static std::string getImageName(const std::string name)
+    {
+        std::string imageName = name;
+        for (unsigned int i = 0; i < imageName.length(); ++i)
+        {
+            if (imageName[i] == ' ')
+            {
+                imageName[i] = '_';
+            }
+            else if (imageName[i] >= 'A' && imageName[i] <= 'Z') {
+                imageName[i] = imageName[i] - 'A' + 'a';
+            }
+        }
+        return imageName.append(IMAGE_EXTENSION);
+    }
+
+    // Load all item information
+    static void initItems()
+    {
+        std::ifstream itemSchema(ITEM_SCHEMA_FILE);
+        std::string curLine;
+        //
+        ItemId lastId = 0;
+        Item* curItem = new Item;
+        bool itemNamed = false;
+        bool itemTyped = false;
+        bool itemScripted = false;
+        bool itemDefined = false; // all item fields filled?
+        unsigned int lineNumber = 0;
+        //
+        if (itemSchema.is_open())
+        {
+            while (itemSchema.good())
+            {
+                ++lineNumber;
+                getline(itemSchema, curLine);
+                if (cleanLine(curLine))
+                {
+                    if (!itemNamed)
+                    {
+                        curItem->id = ++lastId;
+                        curItem->name = curLine;
+                        curItem->imageName = getImageName(curLine);
+                        // TODO preload/load image?
+                        itemNamed = true;
+                    }
+                    else if (!itemTyped) {
+                        // TODO create field for item type, set type
+                        itemTyped = true;
+                    }
+                    else {
+                        curItem->scripting.push_back(curLine);
+                        itemScripted = true;
+                        // TODO generate description?
+                    }
+                }
+                else {
+                    itemDefined = itemNamed && itemTyped && itemScripted;
+                    //
+                    if (itemDefined)
+                    {
+                        itemsById.push_back(*curItem);
+                        curItem = new Item;
+                        itemNamed = false;
+                        itemTyped = false;
+                        itemScripted = false;
+                        itemDefined = false;
+                    }
+                    else if (itemNamed) {
+                        warn() << "Item definition incomplete by line " << lineNumber
+                            << ", missing " << (itemTyped ? "scripting" : "type")
+                            << ", ignoring incomplete item." << std::endl;
+                    }
+                }
+                std::cout << curLine << std::endl;
+            }
+        }
+        else {
+            //error("Cannot load item schema from file \"" + ITEM_SCHEMA_FILE + "\". Maybe the data folder is missing?");
+            error() << "Cannot load item schema from file \"" << ITEM_SCHEMA_FILE << "\". Maybe the data folder is missing?" << std::endl;
+            exit(-1);
+        }
+        itemSchema.close();
+        // TODO check and warn for duplicate item names
+    }
+};
+
+//std::vector<Item> itemsById;
+
+#endif
